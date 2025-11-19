@@ -2,7 +2,11 @@ import React, { useMemo, useRef, useEffect } from "react";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { BrickType } from "@/store/useStore";
 import * as THREE from "three";
-import { RigidBody, RapierRigidBody, CuboidCollider } from "@react-three/rapier";
+import {
+  RigidBody,
+  RapierRigidBody,
+  CuboidCollider,
+} from "@react-three/rapier";
 
 interface BrickProps {
   id?: string;
@@ -125,38 +129,41 @@ export const Brick: React.FC<BrickProps> = ({
 }) => {
   const { width, depth } = BRICK_DIMENSIONS[type];
   const rigidBodyRef = useRef<RapierRigidBody>(null);
-  
+
   // Calculate initial rotation in radians
   const rotationRadians = (rotation * Math.PI) / 2;
-  const quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rotationRadians);
+  const quaternion = new THREE.Quaternion().setFromAxisAngle(
+    new THREE.Vector3(0, 1, 0),
+    rotationRadians
+  );
 
   // Effect to apply explosion impulse
   useEffect(() => {
     if (isExploded && rigidBodyRef.current) {
-        // Random impulse direction mostly upwards
-        const angle = Math.random() * Math.PI * 2;
-        const force = 10 + Math.random() * 20; // Much bigger force
-        const impulse = {
-            x: Math.cos(angle) * force,
-            y: 15 + Math.random() * 15, // Much higher upward pop
-            z: Math.sin(angle) * force
-        };
-        const torque = {
-             x: (Math.random() - 0.5) * 10,
-             y: (Math.random() - 0.5) * 20,
-             z: (Math.random() - 0.5) * 10
-        };
-        
-        rigidBodyRef.current.applyImpulse(impulse, true);
-        rigidBodyRef.current.applyTorqueImpulse(torque, true);
-        rigidBodyRef.current.setLinearDamping(0.1); // Less damping for more chaos
-        rigidBodyRef.current.setAngularDamping(0.1);
+      // Random impulse direction mostly upwards
+      const angle = Math.random() * Math.PI * 2;
+      const force = 10 + Math.random() * 40; // Much bigger force
+      const impulse = {
+        x: Math.cos(angle) * force * 5,
+        y: 15 + Math.random() * 15, // Much higher upward pop
+        z: Math.sin(angle) * force,
+      };
+      const torque = {
+        x: (Math.random() - 0.5) * 40,
+        y: (Math.random() - 0.5) * 20,
+        z: (Math.random() - 0.5) * 10,
+      };
+
+      rigidBodyRef.current.applyImpulse(impulse, true);
+      rigidBodyRef.current.applyTorqueImpulse(torque, true);
+      rigidBodyRef.current.setLinearDamping(0.1); // Less damping for more chaos
+      rigidBodyRef.current.setAngularDamping(0.1);
     } else if (!isExploded && rigidBodyRef.current) {
-        // Reset logic handled by parent or key prop change usually
-        // But if we stay mounted, we need to reset.
-        // Actually, if !isExploded, we are usually creating a new static instance or resetting this one.
-        // We'll handle position reset via key/remount in Scene.tsx or kinematic translation.
-        // For now, let's trust the Scene to handle the "Rebuild" by remounting or switching mode.
+      // Reset logic handled by parent or key prop change usually
+      // But if we stay mounted, we need to reset.
+      // Actually, if !isExploded, we are usually creating a new static instance or resetting this one.
+      // We'll handle position reset via key/remount in Scene.tsx or kinematic translation.
+      // For now, let's trust the Scene to handle the "Rebuild" by remounting or switching mode.
     }
   }, [isExploded]);
 
@@ -176,7 +183,9 @@ export const Brick: React.FC<BrickProps> = ({
         friction={0.5}
       >
         {/* We use a slightly smaller collider to avoid initial overlapping issues if bricks are tight */}
-        <CuboidCollider args={[width / 2 - 0.05, BRICK_HEIGHT / 2 - 0.05, depth / 2 - 0.05]} />
+        <CuboidCollider
+          args={[width / 2 - 0.05, BRICK_HEIGHT / 2 - 0.05, depth / 2 - 0.05]}
+        />
         <BrickMesh
           type={type}
           position={[0, 0, 0]}
@@ -189,7 +198,7 @@ export const Brick: React.FC<BrickProps> = ({
 
   return (
     <group position={position} rotation={[0, rotationRadians, 0]}>
-       <BrickMesh
+      <BrickMesh
         type={type}
         position={[0, 0, 0]}
         rotation={0}
@@ -199,7 +208,7 @@ export const Brick: React.FC<BrickProps> = ({
         onClick={onClick}
         onPointerMove={onPointerMove}
         onPointerOut={onPointerOut}
-       />
+      />
     </group>
   );
 };

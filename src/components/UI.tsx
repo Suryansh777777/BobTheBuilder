@@ -71,19 +71,34 @@ export const UI = () => {
   const [isPropertiesOpen, setIsPropertiesOpen] = useState(true);
   const [isRebuildMenuOpen, setIsRebuildMenuOpen] = useState(false);
   const rebuildMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   // Close rebuild menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         rebuildMenuRef.current &&
-        !rebuildMenuRef.current.contains(event.target as Node)
+        !rebuildMenuRef.current.contains(event.target as Node) &&
+        (!mobileMenuRef.current ||
+          !mobileMenuRef.current.contains(event.target as Node))
       ) {
         setIsRebuildMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Initial check for mobile to auto-close panels
+  useEffect(() => {
+    // Use setTimeout to avoid synchronous state update warning and ensure valid window usage
+    const timer = setTimeout(() => {
+      if (window.innerWidth < 768) {
+        setIsLibraryOpen(false);
+        setIsPropertiesOpen(false);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const toggleLibrary = () => {
@@ -109,7 +124,7 @@ export const UI = () => {
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col justify-between z-10 overflow-hidden">
       {/* Header / Top Bar */}
-      <header className="pointer-events-auto flex items-center justify-between p-4 sm:p-6">
+      <header className="pointer-events-auto flex items-center justify-between p-4 sm:p-6 z-50">
         <div
           className={clsx(
             "flex items-center gap-3 backdrop-blur-xl border p-3 pr-6 rounded-2xl shadow-2xl group transition-colors cursor-default",
@@ -181,13 +196,13 @@ export const UI = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex sm:flex-row flex-col-reverse items-center gap-1 sm:gap-4 pl-2 sm:pl-0">
           <a
             href="https://github.com/Suryansh777777/BobTheBuilder"
             target="_blank"
             rel="noopener noreferrer"
             className={clsx(
-              "flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs transition-all shadow-lg border group duration-500",
+              "sm:flex hidden items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs transition-all shadow-lg border group duration-500",
               darkMode
                 ? "bg-black/40 border-white/10 text-gray-300 hover:text-white hover:bg-white/10"
                 : "bg-white/60 border-black/5 text-gray-600 hover:text-slate-900 hover:bg-black/5"
@@ -198,11 +213,12 @@ export const UI = () => {
               className="text-yellow-500 group-hover:scale-110 transition-transform"
               fill="currentColor"
             />
-            <span>Star on GitHub</span>
+            <span className="hidden sm:inline">Star on GitHub</span>
+            <span className="sm:hidden">GitHub</span>
           </a>
           <div
             className={clsx(
-              "hidden md:flex items-center gap-3 text-xs font-medium text-gray-400 backdrop-blur-xl border px-4 py-2 rounded-xl shadow-lg transition-all duration-500",
+              " flex items-center gap-3 text-xs font-medium text-gray-400 backdrop-blur-xl border px-2 py-1 sm:px-4 sm:py-2 rounded-xl shadow-lg transition-all duration-500",
               darkMode
                 ? "bg-black/40 border-white/10 text-gray-300 hover:text-white hover:bg-white/10"
                 : "bg-white/60 border-black/5 text-gray-600 hover:text-slate-900 hover:bg-black/5"
@@ -211,7 +227,7 @@ export const UI = () => {
             <span>Made by Suryansh</span>
             <div
               className={clsx(
-                "w-px h-3",
+                "w-px h-3 ",
                 darkMode ? "bg-white/10" : "bg-black/10"
               )}
             />
@@ -256,21 +272,25 @@ export const UI = () => {
         {/* Left Panel: Brick Library */}
         <div
           className={clsx(
-            "pointer-events-auto transition-all duration-300 ease-out flex flex-col gap-4 h-auto max-h-[70vh]",
+            "pointer-events-auto transition-all duration-300 ease-out flex flex-col gap-4",
+            // Mobile: Absolute positioned overlay
+            "absolute left-4 top-4 bottom-24 z-40 w-[calc(100vw-2rem)] max-w-[320px]",
+            // Desktop: Relative flow
+            "sm:relative sm:inset-auto sm:h-auto sm:w-64 sm:max-h-[70vh] sm:z-auto",
             isLibraryOpen && !isExploded
               ? "translate-x-0 opacity-100"
-              : "-translate-x-[120%] opacity-0 absolute"
+              : "-translate-x-[120%] opacity-0 pointer-events-none"
           )}
         >
           <div
             className={clsx(
-              "w-[calc(100vw-2rem)] sm:w-64 backdrop-blur-xl border rounded-3xl p-4 flex flex-col gap-4 shadow-2xl",
+              "w-full h-full backdrop-blur-xl border rounded-3xl p-4 flex flex-col gap-4 shadow-2xl overflow-hidden",
               darkMode
                 ? "bg-black/60 border-white/10"
                 : "bg-white/60 border-black/5"
             )}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between shrink-0">
               <h2
                 className={clsx(
                   "text-sm font-bold uppercase tracking-wider flex items-center gap-2",
@@ -283,7 +303,7 @@ export const UI = () => {
               <button
                 onClick={toggleLibrary}
                 className={clsx(
-                  "sm:hidden p-1.5 rounded-lg text-gray-400 hover:text-white",
+                  "sm:hidden p-1.5 rounded-lg text-gray-400 hover:text-white transition-colors",
                   darkMode
                     ? "bg-white/5 text-gray-400 hover:text-white"
                     : "bg-black/5 text-gray-500 hover:text-slate-900"
@@ -293,13 +313,13 @@ export const UI = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 overflow-y-auto pr-1 custom-scrollbar content-start">
+            <div className="grid grid-cols-2 gap-3 overflow-y-auto pr-1 custom-scrollbar content-start flex-1">
               {BRICK_TYPES.map((type) => (
                 <button
                   key={type}
                   onClick={() => setBrickType(type)}
                   className={clsx(
-                    "relative p-4 rounded-2xl border transition-all duration-200 flex flex-col items-center gap-3 group overflow-hidden",
+                    "relative p-4 rounded-2xl border transition-all duration-200 flex flex-col items-center gap-3 group overflow-hidden shrink-0",
                     selectedBrickType === type
                       ? "bg-blue-500/10 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
                       : "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20 hover:-translate-y-0.5"
@@ -380,7 +400,7 @@ export const UI = () => {
 
         {/* Toggle Library Button (Visible when closed) */}
         {!isLibraryOpen && !isExploded && (
-          <div className="absolute left-6 pointer-events-auto">
+          <div className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 pointer-events-auto z-20">
             <button
               onClick={toggleLibrary}
               className="p-3 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-white/10 transition-colors shadow-xl"
@@ -393,29 +413,33 @@ export const UI = () => {
         {/* Right Panel: Properties */}
         <div
           className={clsx(
-            "pointer-events-auto transition-all duration-300 ease-out flex flex-col gap-4 h-auto max-h-[70vh]",
+            "pointer-events-auto transition-all duration-300 ease-out flex flex-col gap-4",
+            // Mobile: Absolute positioned overlay
+            "absolute right-4 top-4 bottom-24 z-40 w-[calc(100vw-2rem)] max-w-[320px]",
+            // Desktop: Relative flow
+            "sm:relative sm:inset-auto sm:h-auto sm:w-72 sm:max-h-[70vh] sm:z-auto",
             isPropertiesOpen && !isExploded
               ? "translate-x-0 opacity-100"
-              : "translate-x-[120%] opacity-0 absolute right-6"
+              : "translate-x-[120%] opacity-0 pointer-events-none"
           )}
         >
           <div
             className={clsx(
-              "w-[calc(100vw-2rem)] sm:w-72 backdrop-blur-xl border rounded-3xl p-4 flex flex-col gap-6 shadow-2xl overflow-y-auto custom-scrollbar",
+              "w-full h-full backdrop-blur-xl border rounded-3xl p-4 flex flex-col gap-6 shadow-2xl overflow-y-auto custom-scrollbar",
               darkMode
                 ? "bg-black/60 border-white/10"
                 : "bg-white/60 border-black/5"
             )}
           >
             {/* Header for Mobile Close */}
-            <div className="flex items-center justify-between sm:hidden">
+            <div className="flex items-center justify-between sm:hidden shrink-0">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                 Properties
               </h3>
               <button
                 onClick={toggleProperties}
                 className={clsx(
-                  "p-1.5 rounded-lg",
+                  "p-1.5 rounded-lg transition-colors",
                   darkMode
                     ? "bg-white/5 text-gray-400 hover:text-white"
                     : "bg-black/5 text-gray-500 hover:text-slate-900"
@@ -426,7 +450,7 @@ export const UI = () => {
             </div>
 
             {/* Colors */}
-            <div className="space-y-3">
+            <div className="space-y-3 shrink-0">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                 <Palette size={14} className="text-pink-500" /> Colors
               </h3>
@@ -436,7 +460,7 @@ export const UI = () => {
                     key={color}
                     onClick={() => setColor(color)}
                     className={clsx(
-                      "w-8 h-8 rounded-full transition-transform shadow-lg relative group",
+                      "w-full aspect-square rounded-full transition-transform shadow-lg relative group",
                       selectedColor === color
                         ? "scale-110 ring-2 ring-white ring-offset-2 ring-offset-black"
                         : "hover:scale-105 hover:ring-2 hover:ring-white/50 hover:ring-offset-1 hover:ring-offset-black"
@@ -449,11 +473,14 @@ export const UI = () => {
             </div>
 
             <div
-              className={clsx("h-px", darkMode ? "bg-white/10" : "bg-black/10")}
+              className={clsx(
+                "h-px shrink-0",
+                darkMode ? "bg-white/10" : "bg-black/10"
+              )}
             />
 
             {/* Selection Transform */}
-            <div className="space-y-3">
+            <div className="space-y-3 shrink-0">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                 <RotateCw size={14} className="text-green-500" /> Transform
               </h3>
@@ -504,11 +531,14 @@ export const UI = () => {
             </div>
 
             <div
-              className={clsx("h-px", darkMode ? "bg-white/10" : "bg-black/10")}
+              className={clsx(
+                "h-px shrink-0",
+                darkMode ? "bg-white/10" : "bg-black/10"
+              )}
             />
 
             {/* Scene Toggles */}
-            <div className="space-y-3">
+            <div className="space-y-3 shrink-0">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                 Scene
               </h3>
@@ -541,7 +571,7 @@ export const UI = () => {
 
         {/* Toggle Properties Button (Visible when closed) */}
         {!isPropertiesOpen && !isExploded && (
-          <div className="absolute right-6 pointer-events-auto">
+          <div className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 pointer-events-auto z-20">
             <button
               onClick={toggleProperties}
               className={clsx(
@@ -560,12 +590,14 @@ export const UI = () => {
       {/* Bottom Toolbar */}
       <div
         className={clsx(
-          "pointer-events-auto pb-8 px-4 flex justify-center items-end transition-transform duration-300 translate-y-0"
+          "pointer-events-auto pb-4 sm:pb-8 px-4 flex justify-center items-end transition-transform duration-300 translate-y-0 z-50 w-full"
         )}
       >
         <div
           className={clsx(
-            "backdrop-blur-xl border p-2 rounded-3xl shadow-2xl flex items-center gap-2 md:gap-4",
+            "backdrop-blur-xl border p-2 rounded-3xl shadow-2xl flex items-center gap-2 md:gap-4 max-w-full [&::-webkit-scrollbar]:hidden",
+            // Mobile: Auto scroll, Desktop: Visible overflow to allow dropdowns
+            "overflow-x-auto sm:overflow-visible",
             darkMode
               ? "bg-black/60 border-white/10"
               : "bg-white/60 border-black/5"
@@ -573,7 +605,7 @@ export const UI = () => {
         >
           <div
             className={clsx(
-              "flex items-center gap-1 p-1 rounded-2xl",
+              "flex items-center gap-1 p-1 rounded-2xl shrink-0",
               darkMode ? "bg-white/5" : "bg-black/5"
             )}
           >
@@ -613,12 +645,12 @@ export const UI = () => {
 
           <div
             className={clsx(
-              "w-px h-8",
+              "w-px h-8 shrink-0",
               darkMode ? "bg-white/10" : "bg-black/10"
             )}
           />
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             <IconButton
               onClick={undo}
               icon={<Undo2 size={20} />}
@@ -648,13 +680,13 @@ export const UI = () => {
 
           <div
             className={clsx(
-              "w-px h-8",
+              "w-px h-8 shrink-0",
               darkMode ? "bg-white/10" : "bg-black/10"
             )}
           />
 
           {/* Rebuild / Templates / Explode */}
-          <div className="relative flex gap-2" ref={rebuildMenuRef}>
+          <div className="relative flex gap-2 shrink-0" ref={rebuildMenuRef}>
             {/* Rebuild Menu Trigger */}
             <button
               onClick={() =>
@@ -697,60 +729,109 @@ export const UI = () => {
               </button>
             )}
 
-            {/* Dropdown Menu - Upwards */}
+            {/* Dropdown Menu - Desktop (Hidden on Mobile) */}
             {isRebuildMenuOpen && !isExploded && (
               <div
                 className={clsx(
-                  "absolute bottom-full right-0 mb-2 w-48 backdrop-blur-xl border rounded-2xl shadow-2xl p-2 flex flex-col gap-1 animate-in fade-in slide-in-from-bottom-2 z-50",
+                  "hidden sm:flex absolute bottom-full right-0 mb-2 w-48 backdrop-blur-xl border rounded-2xl shadow-2xl p-2 flex-col gap-1 animate-in fade-in slide-in-from-bottom-2 z-50",
                   darkMode
                     ? "bg-black/80 border-white/10"
                     : "bg-white/80 border-black/5"
                 )}
               >
-                <h3 className="text-[10px] font-bold text-gray-500 uppercase px-2 py-1">
-                  Load Model
-                </h3>
-                {Object.keys(MODELS).map((model) => (
-                  <button
-                    key={model}
-                    onClick={() => handleLoadModel(model)}
-                    className={clsx(
-                      "flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-colors text-left capitalize",
-                      darkMode
-                        ? "hover:bg-white/10 text-white"
-                        : "hover:bg-black/5 text-slate-900"
-                    )}
-                  >
-                    <Box size={14} className="text-blue-400" />
-                    {model.toLowerCase()}
-                  </button>
-                ))}
-                <div
-                  className={clsx(
-                    "h-px my-1",
-                    darkMode ? "bg-white/10" : "bg-black/10"
-                  )}
-                />
-                <button
-                  onClick={() => {
+                <RebuildMenuContent
+                  onLoadModel={handleLoadModel}
+                  onClear={() => {
                     clearAll();
                     setIsRebuildMenuOpen(false);
                   }}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-500/20 text-sm text-red-400 hover:text-red-300 transition-colors text-left"
-                >
-                  <Trash2 size={14} />
-                  Clear Scene
-                </button>
+                  darkMode={darkMode}
+                />
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Mobile Rebuild Menu (Fixed positioning overlay) */}
+      {isRebuildMenuOpen && !isExploded && (
+        <div className="sm:hidden fixed inset-0 z-50 flex items-end justify-center pointer-events-auto">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setIsRebuildMenuOpen(false)}
+          />
+
+          {/* Menu Content */}
+          <div
+            ref={mobileMenuRef}
+            className={clsx(
+              "relative w-full max-w-md mx-4 mb-24 backdrop-blur-xl border rounded-3xl shadow-2xl p-3 flex flex-col gap-1 animate-in slide-in-from-bottom-10 duration-300",
+              darkMode
+                ? "bg-black/90 border-white/10"
+                : "bg-white/90 border-black/5"
+            )}
+          >
+            <div className="flex justify-center mb-2 pt-1">
+              <div className="w-10 h-1 rounded-full bg-gray-400/30" />
+            </div>
+            <RebuildMenuContent
+              onLoadModel={handleLoadModel}
+              onClear={() => {
+                clearAll();
+                setIsRebuildMenuOpen(false);
+              }}
+              darkMode={darkMode}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 // Sub-components
+
+const RebuildMenuContent = ({
+  onLoadModel,
+  onClear,
+  darkMode,
+}: {
+  onLoadModel: (model: string) => void;
+  onClear: () => void;
+  darkMode: boolean;
+}) => (
+  <>
+    <h3 className="text-[10px] font-bold text-gray-500 uppercase px-2 py-1">
+      Load Model
+    </h3>
+    {Object.keys(MODELS).map((model) => (
+      <button
+        key={model}
+        onClick={() => onLoadModel(model)}
+        className={clsx(
+          "flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-colors text-left capitalize",
+          darkMode
+            ? "hover:bg-white/10 text-white"
+            : "hover:bg-black/5 text-slate-900"
+        )}
+      >
+        <Box size={14} className="text-blue-400" />
+        {model.toLowerCase()}
+      </button>
+    ))}
+    <div
+      className={clsx("h-px my-1", darkMode ? "bg-white/10" : "bg-black/10")}
+    />
+    <button
+      onClick={onClear}
+      className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-500/20 text-sm text-red-400 hover:text-red-300 transition-colors text-left"
+    >
+      <Trash2 size={14} />
+      Clear Scene
+    </button>
+  </>
+);
 
 interface ToolButtonProps {
   active: boolean;
@@ -821,6 +902,7 @@ const IconButton = ({
       danger
         ? "hover:bg-red-500/20 hover:text-red-500"
         : clsx(
+            "text-gray-400",
             darkMode
               ? "hover:text-white hover:bg-white/10"
               : "hover:text-slate-900 hover:bg-black/5"
