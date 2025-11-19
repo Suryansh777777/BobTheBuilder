@@ -21,6 +21,7 @@ import {
   Zap,
   Hammer,
   LayoutTemplate,
+  Star,
 } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -181,12 +182,30 @@ export const UI = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <a
+            href="https://github.com/Suryansh777777/BobTheBuilder"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={clsx(
+              "flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs transition-all shadow-lg border group duration-500",
+              darkMode
+                ? "bg-black/40 border-white/10 text-gray-300 hover:text-white hover:bg-white/10"
+                : "bg-white/60 border-black/5 text-gray-600 hover:text-slate-900 hover:bg-black/5"
+            )}
+          >
+            <Star
+              size={14}
+              className="text-yellow-500 group-hover:scale-110 transition-transform"
+              fill="currentColor"
+            />
+            <span>Star on GitHub</span>
+          </a>
           <div
             className={clsx(
-              "hidden md:flex items-center gap-3 text-xs font-medium text-gray-400 backdrop-blur-xl border px-4 py-2 rounded-xl shadow-lg",
+              "hidden md:flex items-center gap-3 text-xs font-medium text-gray-400 backdrop-blur-xl border px-4 py-2 rounded-xl shadow-lg transition-all duration-500",
               darkMode
-                ? "bg-black/40 border-white/10"
-                : "bg-white/60 border-black/5"
+                ? "bg-black/40 border-white/10 text-gray-300 hover:text-white hover:bg-white/10"
+                : "bg-white/60 border-black/5 text-gray-600 hover:text-slate-900 hover:bg-black/5"
             )}
           >
             <span>Made by Suryansh</span>
