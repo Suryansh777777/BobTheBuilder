@@ -23,6 +23,9 @@ import {
   LayoutTemplate,
   Star,
   CloudFog,
+  Info,
+  MousePointerClick,
+  Move,
 } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -221,7 +224,7 @@ export const UI = () => {
           </a>
           <div
             className={clsx(
-              " flex items-center gap-3 text-xs font-medium text-gray-400 backdrop-blur-xl border px-2 py-1 sm:px-4 sm:py-2 rounded-xl shadow-lg transition-all duration-500",
+              "hidden sm:flex items-center gap-3 text-xs font-medium text-gray-400 backdrop-blur-xl border px-2 py-1 sm:px-4 sm:py-2 rounded-xl shadow-lg transition-all duration-500",
               darkMode
                 ? "bg-black/40 border-white/10 text-gray-300 hover:text-white hover:bg-white/10"
                 : "bg-white/60 border-black/5 text-gray-600 hover:text-slate-900 hover:bg-black/5"
@@ -266,6 +269,64 @@ export const UI = () => {
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
             </a>
+          </div>
+
+          {/* Controls Info (Desktop Only) */}
+          <div className="hidden sm:block relative group">
+            <button
+              className={clsx(
+                "flex items-center justify-center p-2 rounded-xl border transition-colors shadow-lg",
+                darkMode
+                  ? "bg-black/40 border-white/10 text-gray-400 hover:text-white hover:bg-white/10"
+                  : "bg-white/60 border-black/5 text-gray-600 hover:text-slate-900 hover:bg-black/5"
+              )}
+            >
+              <Info size={18} />
+            </button>
+            {/* Tooltip */}
+            <div
+              className={clsx(
+                "absolute right-0 top-full mt-3 w-48 p-3 rounded-2xl border shadow-2xl backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto translate-y-2 group-hover:translate-y-0",
+                darkMode
+                  ? "bg-black/80 border-white/10 text-gray-200"
+                  : "bg-white/80 border-black/5 text-gray-700"
+              )}
+            >
+              <div className="space-y-2">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className={clsx(
+                      "p-1.5 rounded-lg",
+                      darkMode ? "bg-white/10" : "bg-black/5"
+                    )}
+                  >
+                    <MousePointerClick size={14} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold uppercase opacity-50">
+                      Zoom
+                    </span>
+                    <span className="text-xs font-medium">Ctrl + Scroll</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className={clsx(
+                      "p-1.5 rounded-lg",
+                      darkMode ? "bg-white/10" : "bg-black/5"
+                    )}
+                  >
+                    <Move size={14} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold uppercase opacity-50">
+                      Pan
+                    </span>
+                    <span className="text-xs font-medium">Shift + Drag</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </header>
