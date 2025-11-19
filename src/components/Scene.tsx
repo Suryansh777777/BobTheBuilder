@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Canvas, ThreeEvent } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -6,6 +6,7 @@ import {
   Environment,
   ContactShadows,
 } from "@react-three/drei";
+import { Physics, RigidBody } from "@react-three/rapier";
 import { useStore, BrickData, BrickType } from "@/store/useStore";
 import { Brick, BRICK_HEIGHT, BRICK_DIMENSIONS } from "./Brick";
 import * as THREE from "three";
@@ -23,6 +24,8 @@ const SceneContent = () => {
     setColor,
     showGrid,
     showShadows,
+    isExploded, // Get exploded state
+    darkMode, // Get dark mode state
   } = useStore();
 
   const [ghostPosition, setGhostPosition] = useState<
@@ -39,6 +42,8 @@ const SceneContent = () => {
 
   const handlePointerMove = useCallback(
     (e: ThreeEvent<MouseEvent>) => {
+      if (isExploded) return; // Disable placement during explosion
+
       e.stopPropagation();
       if (selectedTool !== "add") {
         setGhostPosition(null);
@@ -100,11 +105,13 @@ const SceneContent = () => {
         }
       }
     },
-    [selectedTool, selectedBrickType, width, depth]
+    [selectedTool, selectedBrickType, width, depth, isExploded]
   );
 
   const handleClick = useCallback(
     (e: ThreeEvent<MouseEvent>) => {
+      if (isExploded) return; // Disable interactions during explosion
+
       e.stopPropagation();
 
       if (selectedTool === "add" && ghostPosition) {
@@ -129,10 +136,13 @@ const SceneContent = () => {
       selectedColor,
       addBrick,
       selectBrick,
+      isExploded,
     ]
   );
 
   const handleBrickClick = (e: ThreeEvent<MouseEvent>, brick: BrickData) => {
+    if (isExploded) return;
+
     e.stopPropagation();
     if (selectedTool === "erase") {
       removeBrick(brick.id);
@@ -159,17 +169,30 @@ const SceneContent = () => {
   };
 
   return (
-    <>
+    <Physics gravity={[0, -15, 0]}>
       <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+      <directionalLight
+        position={[10, 10, 5]}
+        intensity={1}
+        castShadow
+        shadow-camera-left={-20}
+        shadow-camera-right={20}
+        shadow-camera-top={20}
+        shadow-camera-bottom={-20}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
       <Environment preset="city" />
 
-      {showShadows && (
+      {showShadows && !isExploded && (
         <ContactShadows
           position={[0, 0, 0]}
-          opacity={0.4}
-          scale={20}
-          blur={2}
+          opacity={darkMode ? 0.4 : 0.6}
+          scale={100}
+          blur={darkMode ? 2 : 2.5}
+          far={50}
+          resolution={1024}
+          color="#000000"
         />
       )}
 
@@ -177,8 +200,8 @@ const SceneContent = () => {
         <Grid
           infiniteGrid
           fadeDistance={30}
-          sectionColor="#444"
-          cellColor="#888"
+          sectionColor={darkMode ? "#444" : "#94a3b8"}
+          cellColor={darkMode ? "#888" : "#cbd5e1"}
         />
       )}
 
@@ -194,19 +217,30 @@ const SceneContent = () => {
         <meshBasicMaterial visible={false} />
       </mesh>
 
+      {/* Invisible Floor for Physics */}
+      {isExploded && (
+        <RigidBody type="fixed" position={[0, -0.5, 0]} friction={0.5}>
+          <mesh>
+            <boxGeometry args={[100, 1, 100]} />
+            <meshBasicMaterial visible={false} />
+          </mesh>
+        </RigidBody>
+      )}
+
       {/* Placed Bricks */}
       {bricks.map((brick) => (
         <Brick
           key={brick.id}
           {...brick}
           isSelected={selectedBrickId === brick.id}
+          isExploded={isExploded}
           onClick={(e) => handleBrickClick(e, brick)}
           onPointerMove={handlePointerMove}
         />
       ))}
 
       {/* Ghost Brick */}
-      {selectedTool === "add" && ghostPosition && (
+      {selectedTool === "add" && ghostPosition && !isExploded && (
         <Brick
           type={selectedBrickType}
           position={ghostPosition}
@@ -217,17 +251,18 @@ const SceneContent = () => {
       )}
 
       <OrbitControls makeDefault />
-    </>
+    </Physics>
   );
 };
 
 export const Scene = () => {
+  const { darkMode } = useStore();
   return (
     <div className="w-full h-full bg-transparent">
       <Canvas shadows camera={{ position: [8, 8, 8], fov: 45 }}>
-        <color attach="background" args={["#0f172a"]} /> {/* Match slate-950 */}
+        <color attach="background" args={[darkMode ? "#0f172a" : "#f1f5f9"]} />
         <SceneContent />
-        <fog attach="fog" args={["#0f172a", 10, 40]} />
+        <fog attach="fog" args={[darkMode ? "#0f172a" : "#f1f5f9", 10, 40]} />
       </Canvas>
     </div>
   );

@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
-import { ThreeEvent } from "@react-three/fiber";
+import React, { useMemo, useRef, useEffect } from "react";
+import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { BrickType } from "@/store/useStore";
 import * as THREE from "three";
+import { RigidBody, RapierRigidBody, CuboidCollider } from "@react-three/rapier";
 
 interface BrickProps {
   id?: string;
@@ -11,6 +12,7 @@ interface BrickProps {
   color: string;
   isGhost?: boolean;
   isSelected?: boolean;
+  isExploded?: boolean; // New prop
   onClick?: (e: ThreeEvent<MouseEvent>) => void;
   onPointerMove?: (e: ThreeEvent<MouseEvent>) => void;
   onPointerOut?: (e: ThreeEvent<MouseEvent>) => void;
@@ -30,22 +32,17 @@ export const BRICK_HEIGHT = 1.2;
 export const STUD_HEIGHT = 0.2;
 export const STUD_RADIUS = 0.3;
 
-export const Brick: React.FC<BrickProps> = ({
-  id,
+const BrickMesh: React.FC<Omit<BrickProps, "id" | "isExploded">> = ({
   type,
-  position,
   rotation,
   color,
-  isGhost = false,
-  isSelected = false,
+  isGhost,
+  isSelected,
   onClick,
   onPointerMove,
   onPointerOut,
-  ...props
 }) => {
   const { width, depth } = BRICK_DIMENSIONS[type];
-
-  // Create geometry for studs
   const studs = useMemo(() => {
     const studArray = [];
     for (let x = 0; x < width; x++) {
@@ -62,19 +59,17 @@ export const Brick: React.FC<BrickProps> = ({
     return studArray;
   }, [width, depth]);
 
-  // Adjust rotation
-  const rotationRadians = (rotation * Math.PI) / 2;
+  // Adjust rotation for visual mesh only if it's NOT handled by RigidBody parent
+  // But here we assume this mesh is inside a group or RigidBody that handles position/rotation.
+  // Wait, if we are in a RigidBody, the RigidBody handles the transform.
+  // If we are static, we need to apply rotation here.
 
   return (
     <group
-      position={position}
-      rotation={[0, rotationRadians, 0]}
       onClick={onClick}
       onPointerMove={onPointerMove}
       onPointerOut={onPointerOut}
-      {...props}
     >
-      {/* Main Brick Body */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={[width, BRICK_HEIGHT, depth]} />
         <meshStandardMaterial
@@ -82,10 +77,11 @@ export const Brick: React.FC<BrickProps> = ({
           transparent={isGhost}
           opacity={isGhost ? 0.5 : 1}
           emissive={isSelected ? "#444" : "#000"}
+          roughness={0.2}
+          metalness={0.1}
         />
       </mesh>
 
-      {/* Studs */}
       {studs.map((stud, i) => (
         <mesh key={i} position={stud.position} castShadow receiveShadow>
           <cylinderGeometry
@@ -96,11 +92,12 @@ export const Brick: React.FC<BrickProps> = ({
             transparent={isGhost}
             opacity={isGhost ? 0.5 : 1}
             emissive={isSelected ? "#444" : "#000"}
+            roughness={0.2}
+            metalness={0.1}
           />
         </mesh>
       ))}
 
-      {/* Selection Outline (optional, but good for UX) */}
       {isSelected && (
         <lineSegments>
           <edgesGeometry
@@ -109,6 +106,100 @@ export const Brick: React.FC<BrickProps> = ({
           <lineBasicMaterial color="white" />
         </lineSegments>
       )}
+    </group>
+  );
+};
+
+export const Brick: React.FC<BrickProps> = ({
+  id,
+  type,
+  position,
+  rotation,
+  color,
+  isGhost = false,
+  isSelected = false,
+  isExploded = false,
+  onClick,
+  onPointerMove,
+  onPointerOut,
+}) => {
+  const { width, depth } = BRICK_DIMENSIONS[type];
+  const rigidBodyRef = useRef<RapierRigidBody>(null);
+  
+  // Calculate initial rotation in radians
+  const rotationRadians = (rotation * Math.PI) / 2;
+  const quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rotationRadians);
+
+  // Effect to apply explosion impulse
+  useEffect(() => {
+    if (isExploded && rigidBodyRef.current) {
+        // Random impulse direction mostly upwards
+        const angle = Math.random() * Math.PI * 2;
+        const force = 10 + Math.random() * 20; // Much bigger force
+        const impulse = {
+            x: Math.cos(angle) * force,
+            y: 15 + Math.random() * 15, // Much higher upward pop
+            z: Math.sin(angle) * force
+        };
+        const torque = {
+             x: (Math.random() - 0.5) * 10,
+             y: (Math.random() - 0.5) * 20,
+             z: (Math.random() - 0.5) * 10
+        };
+        
+        rigidBodyRef.current.applyImpulse(impulse, true);
+        rigidBodyRef.current.applyTorqueImpulse(torque, true);
+        rigidBodyRef.current.setLinearDamping(0.1); // Less damping for more chaos
+        rigidBodyRef.current.setAngularDamping(0.1);
+    } else if (!isExploded && rigidBodyRef.current) {
+        // Reset logic handled by parent or key prop change usually
+        // But if we stay mounted, we need to reset.
+        // Actually, if !isExploded, we are usually creating a new static instance or resetting this one.
+        // We'll handle position reset via key/remount in Scene.tsx or kinematic translation.
+        // For now, let's trust the Scene to handle the "Rebuild" by remounting or switching mode.
+    }
+  }, [isExploded]);
+
+  // Rebuild Animation Logic (Simple Lerp)
+  // If we are transitioning from Exploded -> Static, we might want to animate.
+  // But for now, let's just snap back or let the user click "Rebuild" which resets state.
+
+  if (isExploded) {
+    return (
+      <RigidBody
+        ref={rigidBodyRef}
+        position={position}
+        rotation={[0, rotationRadians, 0]}
+        colliders="cuboid"
+        type="dynamic"
+        restitution={0.5}
+        friction={0.5}
+      >
+        {/* We use a slightly smaller collider to avoid initial overlapping issues if bricks are tight */}
+        <CuboidCollider args={[width / 2 - 0.05, BRICK_HEIGHT / 2 - 0.05, depth / 2 - 0.05]} />
+        <BrickMesh
+          type={type}
+          position={[0, 0, 0]}
+          rotation={0} // Rotation handled by RigidBody
+          color={color}
+        />
+      </RigidBody>
+    );
+  }
+
+  return (
+    <group position={position} rotation={[0, rotationRadians, 0]}>
+       <BrickMesh
+        type={type}
+        position={[0, 0, 0]}
+        rotation={0}
+        color={color}
+        isGhost={isGhost}
+        isSelected={isSelected}
+        onClick={onClick}
+        onPointerMove={onPointerMove}
+        onPointerOut={onPointerOut}
+       />
     </group>
   );
 };

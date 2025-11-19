@@ -53,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${plusJakarta.variable} ${geistMono.variable} antialiased bg-slate-950 text-slate-50 overflow-hidden font-sans`}
+        className={`${plusJakarta.variable} ${geistMono.variable} antialiased  text-slate-50 overflow-hidden font-sans`}
       >
         {children}
         <Analytics />

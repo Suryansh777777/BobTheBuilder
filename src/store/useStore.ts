@@ -24,6 +24,8 @@ interface State {
 
   showGrid: boolean;
   showShadows: boolean;
+  isExploded: boolean;
+  darkMode: boolean;
 
   // Actions
   addBrick: (brick: Omit<BrickData, "id">) => void;
@@ -35,11 +37,14 @@ interface State {
   setColor: (color: string) => void;
   toggleGrid: () => void;
   toggleShadows: () => void;
+  toggleTheme: () => void;
   rotateSelection: () => void;
 
   undo: () => void;
   redo: () => void;
   clearAll: () => void;
+  setExploded: (exploded: boolean) => void;
+  loadModel: (bricks: BrickData[]) => void;
 }
 
 const MAX_HISTORY = 50;
@@ -56,6 +61,25 @@ export const useStore = create<State>((set, get) => ({
 
   showGrid: true,
   showShadows: true,
+  isExploded: false,
+  darkMode: false,
+
+  loadModel: (newBricks) => {
+    const { history, historyIndex } = get();
+    const bricksCopy = newBricks.map((b) => ({ ...b, id: uuidv4() }));
+
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(bricksCopy);
+    if (newHistory.length > MAX_HISTORY) newHistory.shift();
+
+    set({
+      bricks: bricksCopy,
+      history: newHistory,
+      historyIndex: newHistory.length - 1,
+      isExploded: false,
+      selectedBrickId: null,
+    });
+  },
 
   addBrick: (brickData) => {
     const { bricks, history, historyIndex } = get();
@@ -116,6 +140,7 @@ export const useStore = create<State>((set, get) => ({
   },
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
   toggleShadows: () => set((state) => ({ showShadows: !state.showShadows })),
+  toggleTheme: () => set((state) => ({ darkMode: !state.darkMode })),
 
   rotateSelection: () => {
     const { selectedBrickId, bricks, updateBrick } = get();
@@ -160,4 +185,6 @@ export const useStore = create<State>((set, get) => ({
       selectedBrickId: null,
     });
   },
+
+  setExploded: (exploded) => set({ isExploded: exploded }),
 }));
