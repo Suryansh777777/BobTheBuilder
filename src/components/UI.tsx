@@ -144,7 +144,7 @@ export const UI = () => {
             <span>Made by Suryansh</span>
             <div className="w-px h-3 bg-white/10" />
             <a
-              href="https://github.com/suryansh777777"
+              href="https://github.com/Suryansh777777/BobTheBuilder"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-white transition-colors"
