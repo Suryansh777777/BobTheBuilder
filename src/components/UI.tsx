@@ -22,6 +22,7 @@ import {
   Hammer,
   LayoutTemplate,
   Star,
+  CloudFog,
 } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -56,6 +57,8 @@ export const UI = () => {
     toggleGrid,
     showShadows,
     toggleShadows,
+    showFog,
+    toggleFog,
     darkMode,
     toggleTheme,
     rotateSelection,
@@ -555,6 +558,13 @@ export const UI = () => {
                   onClick={toggleShadows}
                   label="Shadows"
                   icon={<Sun size={16} />}
+                  darkMode={darkMode}
+                />
+                <Toggle
+                  active={showFog}
+                  onClick={toggleFog}
+                  label="Fog"
+                  icon={<CloudFog size={16} />}
                   darkMode={darkMode}
                 />
                 <Toggle

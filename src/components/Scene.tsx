@@ -256,13 +256,15 @@ const SceneContent = () => {
 };
 
 export const Scene = () => {
-  const { darkMode } = useStore();
+  const { darkMode, showFog } = useStore();
   return (
     <div className="w-full h-full bg-transparent">
       <Canvas shadows camera={{ position: [8, 8, 8], fov: 45 }}>
         <color attach="background" args={[darkMode ? "#0f172a" : "#f1f5f9"]} />
         <SceneContent />
-        <fog attach="fog" args={[darkMode ? "#0f172a" : "#f1f5f9", 10, 40]} />
+        {showFog && (
+          <fog attach="fog" args={[darkMode ? "#0f172a" : "#f1f5f9", 10, 40]} />
+        )}
       </Canvas>
     </div>
   );

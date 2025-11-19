@@ -24,6 +24,7 @@ interface State {
 
   showGrid: boolean;
   showShadows: boolean;
+  showFog: boolean;
   isExploded: boolean;
   darkMode: boolean;
 
@@ -37,6 +38,7 @@ interface State {
   setColor: (color: string) => void;
   toggleGrid: () => void;
   toggleShadows: () => void;
+  toggleFog: () => void;
   toggleTheme: () => void;
   rotateSelection: () => void;
 
@@ -61,6 +63,7 @@ export const useStore = create<State>((set, get) => ({
 
   showGrid: true,
   showShadows: true,
+  showFog: true,
   isExploded: false,
   darkMode: false,
 
@@ -140,6 +143,7 @@ export const useStore = create<State>((set, get) => ({
   },
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
   toggleShadows: () => set((state) => ({ showShadows: !state.showShadows })),
+  toggleFog: () => set((state) => ({ showFog: !state.showFog })),
   toggleTheme: () => set((state) => ({ darkMode: !state.darkMode })),
 
   rotateSelection: () => {
