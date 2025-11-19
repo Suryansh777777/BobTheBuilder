@@ -19,6 +19,22 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  openGraph: {
+    title: "BobTheBuilder - 3D Brick Editor",
+    description:
+      "A modern 3D LEGO-style brick editor built with Next.js and React Three Fiber.",
+    url: "https://bob-the-builder-kappa.vercel.app/",
+    siteName: "BobTheBuilder",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BobTheBuilder - 3D Brick Editor",
+    description:
+      "A modern 3D LEGO-style brick editor built with Next.js and React Three Fiber.",
+    creator: "@suryansh777777",
+  },
 };
 
 export const viewport: Viewport = {

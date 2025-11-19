@@ -1,46 +1,77 @@
-# BobTheBuilder
+# BobTheBuilder 🏗️
 
-A 3D LEGO-style brick editor built with Next.js, React Three Fiber, and Zustand.
+![BobTheBuilder Banner](./src/app/opengraph-image.png)
 
-## Features
+A modern, interactive 3D brick building experience built with the power of the web. Design, build, and unleash your creativity in a browser-based LEGO-style editor.
 
-- **3D Viewport**: Infinite grid, OrbitControls (Rotate, Zoom, Pan).
-- **Brick Logic**: Procedural bricks with studs, snapping to grid, and stacking logic.
-- **Library**: Select different brick sizes (1x1, 1x2, 2x2, 2x4).
-- **Tools**:
-  - **Add**: Place bricks (with ghost preview).
-  - **Select**: Select existing bricks to view properties or rotate.
-  - **Paint**: Change color of existing bricks.
-  - **Erase**: Remove bricks.
-- **Properties**: Change colors, rotate bricks.
-- **History**: Undo/Redo support.
+**[Live Demo](https://bob-the-builder-kappa.vercel.app/)**
 
-## Controls
+## ✨ Features
 
-- **Left Click**: Action (Place, Select, Paint, Erase).
-- **Right Click / Drag**: Rotate camera.
-- **Scroll**: Zoom.
-- **Middle Click / Drag**: Pan camera.
+- **Immersive 3D Environment**: Built with React Three Fiber for high-performance WebGL rendering.
+- **Smart Snapping & Stacking**: Intuitive placement system that snaps bricks to the grid and stacks them correctly (stud-to-stud).
+- **Modern UI**: A sleek, glassmorphism-inspired interface designed for accessibility and ease of use.
+- **Essential Tools**:
+  - **Add**: Place bricks with a real-time "ghost" preview.
+  - **Select**: Modify existing bricks.
+  - **Paint**: Recolor your creations instantly.
+  - **Erase**: Remove mistakes with a click.
+- **Customization**:
+  - Rotate bricks 90 degrees.
+  - Choose from a vibrant palette of colors.
+  - Toggle grid and shadows for the perfect view.
+- **History**: Full Undo/Redo support to experiment without fear.
 
-## Development
+## 🎮 Controls
 
-1. Install dependencies:
+| Action                   | Input                                             |
+| :----------------------- | :------------------------------------------------ |
+| **Place / Select / Act** | Left Click                                        |
+| **Rotate Camera**        | Right Click + Drag                                |
+| **Pan Camera**           | Middle Click + Drag (or Shift + Click + Drag)     |
+| **Zoom**                 | Mouse Wheel / Pinch                               |
+| **Tools Shortcuts**      | `V` (Select), `A` (Add), `B` (Paint), `E` (Erase) |
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **3D Engine**: [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) (Three.js)
+- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Font**: [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans)
+
+## 🚀 Getting Started
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/yourusername/bob-the-builder.git
+   cd bob-the-builder
+   ```
+
+2. **Install dependencies**:
 
    ```bash
    npm install
    ```
 
-2. Run development server:
+3. **Run the development server**:
 
    ```bash
    npm run dev
    ```
 
-3. Open [http://localhost:3000](http://localhost:3000).
+4. **Open in browser**:
+   Navigate to [http://localhost:3000](http://localhost:3000).
 
-## Architecture
+## 👨‍💻 Author
 
-- `src/store/useStore.ts`: Zustand store managing global state (bricks, history, selection).
-- `src/components/Scene.tsx`: The 3D canvas, raycasting logic, and rendering of bricks.
-- `src/components/Brick.tsx`: The visual component for a brick (Box + Cylinders).
-- `src/components/UI.tsx`: The overlay UI for tools and library.
+**Suryansh Chourasia**
+
+- [GitHub](https://github.com/suryansh777777)
+- [X (Twitter)](https://x.com/suryansh777777)
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).

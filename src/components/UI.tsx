@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  Github,
 } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -124,18 +125,51 @@ export const UI = () => {
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <PanelButton
-            icon={<Settings2 size={20} />}
-            label="Settings"
-            onClick={() => {}} // Could open a modal
-            active={false}
-          />
-          <PanelButton
-            icon={<Download size={20} />}
-            label="Export"
-            onClick={() => alert("Export feature coming soon!")}
-          />
+        <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3 text-xs font-medium text-gray-400 bg-black/40 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-xl shadow-lg">
+            <span>Made by Suryansh</span>
+            <div className="w-px h-3 bg-white/10" />
+            <a
+              href="https://github.com/suryansh777777"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+              title="GitHub"
+            >
+              <Github size={14} />
+            </a>
+            <a
+              href="https://x.com/suryansh777777"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+              title="X (Twitter)"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="currentColor"
+                className="text-current"
+              >
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </a>
+          </div>
+
+          <div className="flex gap-2">
+            <PanelButton
+              icon={<Settings2 size={20} />}
+              label="Settings"
+              onClick={() => {}} // Could open a modal
+              active={false}
+            />
+            <PanelButton
+              icon={<Download size={20} />}
+              label="Export"
+              onClick={() => alert("Export feature coming soon!")}
+            />
+          </div>
         </div>
       </header>
 
