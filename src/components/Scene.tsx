@@ -223,9 +223,11 @@ const SceneContent = () => {
 
 export const Scene = () => {
   return (
-    <div className="w-full h-full bg-gray-900">
-      <Canvas shadows camera={{ position: [5, 5, 5], fov: 50 }}>
+    <div className="w-full h-full bg-transparent">
+      <Canvas shadows camera={{ position: [8, 8, 8], fov: 45 }}>
+        <color attach="background" args={["#0f172a"]} /> {/* Match slate-950 */}
         <SceneContent />
+        <fog attach="fog" args={["#0f172a", 10, 40]} />
       </Canvas>
     </div>
   );
