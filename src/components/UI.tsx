@@ -62,6 +62,20 @@ export const UI = () => {
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const [isPropertiesOpen, setIsPropertiesOpen] = useState(true);
 
+  const toggleLibrary = () => {
+    setIsLibraryOpen(!isLibraryOpen);
+    if (!isLibraryOpen && window.innerWidth < 768) {
+      setIsPropertiesOpen(false);
+    }
+  };
+
+  const toggleProperties = () => {
+    setIsPropertiesOpen(!isPropertiesOpen);
+    if (!isPropertiesOpen && window.innerWidth < 768) {
+      setIsLibraryOpen(false);
+    }
+  };
+
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col justify-between z-10 overflow-hidden">
       {/* Header / Top Bar */}
@@ -184,11 +198,18 @@ export const UI = () => {
               : "-translate-x-[120%] opacity-0 absolute"
           )}
         >
-          <div className="w-64 bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-4 flex flex-col gap-4 shadow-2xl">
+          <div className="w-[calc(100vw-2rem)] sm:w-64 bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-4 flex flex-col gap-4 shadow-2xl">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <Box size={14} className="text-blue-500" /> Library
               </h2>
+              {/* Close button for mobile */}
+              <button
+                onClick={toggleLibrary}
+                className="sm:hidden p-1.5 bg-white/5 rounded-lg text-gray-400 hover:text-white"
+              >
+                <ChevronLeft size={16} />
+              </button>
             </div>
 
             <div className="relative group">
@@ -271,7 +292,7 @@ export const UI = () => {
         {!isLibraryOpen && (
           <div className="absolute left-6 pointer-events-auto">
             <button
-              onClick={() => setIsLibraryOpen(true)}
+              onClick={toggleLibrary}
               className="p-3 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-white/10 transition-colors shadow-xl"
             >
               <ChevronRight size={20} />
@@ -288,7 +309,20 @@ export const UI = () => {
               : "translate-x-[120%] opacity-0 absolute right-6"
           )}
         >
-          <div className="w-72 bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-4 flex flex-col gap-6 shadow-2xl overflow-y-auto custom-scrollbar">
+          <div className="w-[calc(100vw-2rem)] sm:w-72 bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-4 flex flex-col gap-6 shadow-2xl overflow-y-auto custom-scrollbar">
+            {/* Header for Mobile Close */}
+            <div className="flex items-center justify-between sm:hidden">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                Properties
+              </h3>
+              <button
+                onClick={toggleProperties}
+                className="p-1.5 bg-white/5 rounded-lg text-gray-400 hover:text-white"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+
             {/* Colors */}
             <div className="space-y-3">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
@@ -379,7 +413,7 @@ export const UI = () => {
         {!isPropertiesOpen && (
           <div className="absolute right-6 pointer-events-auto">
             <button
-              onClick={() => setIsPropertiesOpen(true)}
+              onClick={toggleProperties}
               className="p-3 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-white/10 transition-colors shadow-xl"
             >
               <ChevronLeft size={20} />
